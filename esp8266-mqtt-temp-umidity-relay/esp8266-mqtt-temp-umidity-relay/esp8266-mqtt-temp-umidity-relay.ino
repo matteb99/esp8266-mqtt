@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 
 //               D1 mini
 // + shield DHT22(igrometer thermometer) onewire (D4)
@@ -10,13 +12,12 @@
 //
 #include <DHT.h>
 #define DHTTYPE DHT22 //tipo di DHT
-#define DHTPIN D4     // pin dove è collegato il DHT non cambiare in caso si usa una della 
-shield
+#define DHTPIN D4     // pin dove è collegato il DHT non cambiare in caso si usa una della  shield
 #include <Wire.h>
+#define relaypin D1
 
 
-
-DHT dht(DHTPIN, DHTTYPE); 
+DHT dht(DHTPIN, DHTTYPE);
 // Temperature Variables
 float hum_f, temp_f;  // Values read from sensor
 
@@ -28,11 +29,11 @@ float hum_f, temp_f;  // Values read from sensor
 #define AIO_SERVER      "IP server" //ip server
 #define AIO_SERVERPORT  1883          //porta del server
 #define AIO_USERNAME    "username"   //nome utente del server
-#define AIO_KEY         "passwd" //passwod del server    
+#define AIO_KEY         "passwd" //passwod del server
 
 // Functions
 void connect();
- 
+
 
 // Create an ESP8266 WiFiClient class to connect to the MQTT server.
 WiFiClient client;
@@ -54,9 +55,9 @@ Adafruit_MQTT_Client mqtt(&client, MQTT_SERVER, AIO_SERVERPORT, MQTT_CLIENTID, M
 
 // Notice MQTT paths for AIO follow the form: <username>/feeds/<feedname>
 
-// Setup feeds for temperature 
+// Setup feeds for temperature
 const char TEMPERATURE_FEED[] PROGMEM = AIO_USERNAME "/feeds/temperature";
-// Setup feeds for Humidity 
+// Setup feeds for Humidity
 const char HUMIDITY_FEED[] PROGMEM = AIO_USERNAME "/feeds/humidity";
 
 
@@ -82,7 +83,7 @@ Serial.println(F("+  MQTT weather station +"));
 Serial.println(F("+++++++++++++++++++++++++++++++++"));
 
 dht.begin();           // initialize temperature sensor
-  // Set lamp pin to output 
+  // Set lamp pin to output
 // Connect to WiFi access point.
   delay(10);
   Serial.print(F("Connecting to "));
@@ -101,7 +102,7 @@ dht.begin();           // initialize temperature sensor
 
   // connect to server
   connect();
- 
+
     previus_celsius=-999;
 }
 
@@ -110,7 +111,7 @@ void loop() {
 //++++++++++++++++++++++++++++++++START TEMP+++++++++++++++++++++++++++++++++
 
   if (conv == false) {
-    conv=true;    
+    conv=true;
     oldtime=millis();
      }
 
@@ -127,7 +128,7 @@ void loop() {
   }
 
 
-  
+
 newtime=millis();
 // Read Temperature   humidity pressure
 if (conv & (newtime-oldtime)> 2000 ) {
@@ -138,9 +139,9 @@ if (conv & (newtime-oldtime)> 2000 ) {
      if (isnan(hum_f) || isnan(temp_f)) {
       Serial.println("Failed to read from DHT sensor!");
       return;}
-  
- 
-      
+
+
+
   conv=false;
   celsius = temp_f;
   celsius=celsius+0.05;
@@ -161,7 +162,7 @@ if (conv & (newtime-oldtime)> 2000 ) {
 // humidity
   hum_f = (hum_f+0.5)*10;
   hum=hum_f/10;// round nearest int
-  
+
   if (hum!=previus_hum) {
                     if (! humidity.publish(hum))
                     Serial.println(F("Failed to publish humidity"));
@@ -174,7 +175,7 @@ if (conv & (newtime-oldtime)> 2000 ) {
                          previus_hum=hum;
                     }
 
- 
+
                   }
 // End Read Temperature
 }
@@ -214,4 +215,3 @@ void connect() {
   Serial.println(F("server Connected!"));
 
 }
- 
